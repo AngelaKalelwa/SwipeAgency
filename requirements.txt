@@ -1,0 +1,6 @@
+chainlit~=2.1.0
+langchain-community~=0.3.16
+langchain-experimental~=0.3.4
+python-dotenv~=1.0.1
+SQLAlchemy~=2.0.37
+langchain-openai~=0.3.3
