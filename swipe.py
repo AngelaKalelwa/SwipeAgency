@@ -12,6 +12,9 @@ from langchain_community.utilities import SQLDatabase
 
 load_dotenv()  # Load environment variables
 
+# Initialize Oracle Client with the correct path
+cx_Oracle.init_oracle_client(lib_dir=r"C:\Users\ADMIN\Downloads\instantclient-basic-windows.x64-23.6.0.24.10\instantclient_23_6")
+
 def init_database(user: str, password: str, host: str, database: str, port: int = 1521) -> SQLDatabase:
     """
     Initializes a connection to an Oracle database using cx_Oracle.
