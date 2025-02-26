@@ -215,34 +215,31 @@ if "chat_history" not in st.session_state:
         AIMessage(content="Hello! I'm an Oracle SQL Database assistant. Ask me anything about your database.")
     ]
 # Check if database connection already exists in session state
-if "db" not in st.session_state:
-    st.session_state.db = None   
+#if "db" not in st.session_state:
+    #st.session_state.db = None   
 
-if "Host" not in st.session_state:
-    st.session_state["Host"] = os.getenv("DB_HOST", "localhost")
-
-if "Port" not in st.session_state:
-    st.session_state["Port"] = os.getenv("DB_PORT", "1521")
-
-if "User" not in st.session_state:
-    st.session_state["User"] = os.getenv("DB_USER", "root")
-
-if "Password" not in st.session_state:
-    st.session_state["Password"] = os.getenv("DB_PASSWORD", "")
-
-if "Service_Name" not in st.session_state:
-    st.session_state["Service_Name"] = os.getenv("DB_SERVICE", "orcl")
+# Ensure session state keys exist before using them
+for key, default in {
+    "Host": os.getenv("DB_HOST", "localhost"),
+    "Port": os.getenv("DB_PORT", "1521"),
+    "User": os.getenv("DB_USER", "root"),
+    "Password": os.getenv("DB_PASSWORD", ""),
+    "Service_Name": os.getenv("DB_SERVICE", "orcl"),
+    "db": None
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
 # Sidebar for connection settings
 with st.sidebar:
     st.subheader("Settings")
     st.write("This is a simple chat application. Connect to the database and start chatting.")
 
-    st.text_input("Host", value=st.session_state["Host"], key="Host")
-    st.text_input("Port", value=st.session_state["Port"], key="Port")
-    st.text_input("User", value=st.session_state["User"], key="User")
-    st.text_input("Password", type="password", value=st.session_state["Password"], key="Password")
-    st.text_input("Service Name", value=st.session_state["Service_Name"], key="Service_Name")
+    st.text_input("Host", key="Host")
+    st.text_input("Port", key="Port")
+    st.text_input("User", key="User")
+    st.text_input("Password", type="password", key="Password")
+    st.text_input("Service Name", key="Service_Name")
 
     if st.button("Connect"):
         if st.session_state.db:
@@ -254,17 +251,14 @@ with st.sidebar:
                         user=st.session_state["User"],
                         password=st.session_state["Password"],
                         host=st.session_state["Host"],
-                        database=st.session_state["Service_Name"],  # Fix parameter order
-                        port=int(st.session_state["Port"])  # Ensure Port is an integer
+                        database=st.session_state["Service_Name"],
+                        port=int(st.session_state["Port"])
                     )
                     st.session_state.db = db
                     st.success("Connected to database")
             except Exception as e:
                 st.error(f"Connection failed: {str(e)}")
-
-    if st.session_state.db:
-        st.success("Already connected to the database")
-
+                
 # Sidebar for connection settings
 #with st.sidebar:
     #st.subheader("Settings")
