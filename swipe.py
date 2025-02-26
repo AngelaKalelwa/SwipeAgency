@@ -13,24 +13,24 @@ from langchain_community.utilities import SQLDatabase
 
 load_dotenv()  # Load environment variables
 
-def init_database():
-    user = "your_username"
-    password = "your_password"
-    host = "your_host"
-    port = "1521"  # Default Oracle port
-    service_name = "your_service"
+import os
+import oracledb
+from sqlalchemy import create_engine
+from langchain.sql_database import SQLDatabase
+
+def init_database(user=None, password=None, host=None, port=None, service_name=None):
+    # Use provided values or fallback to environment variables
+    user = user or os.getenv("DB_USER", "default_user")
+    password = password or os.getenv("DB_PASSWORD", "default_password")
+    host = host or os.getenv("DB_HOST", "localhost")
+    port = port or os.getenv("DB_PORT", "1521")  # Keep as a string
+    service_name = service_name or os.getenv("DB_SERVICE", "orcl")
 
     # Construct the DSN string
     dsn = f"{host}:{port}/{service_name}"
 
-    # Initialize OracleDB (Optional, only for Thick Mode)
-    # oracledb.init_oracle_client(lib_dir="path_to_instant_client")
-
-    # Create the OracleDB connection
-    connection = oracledb.connect(user=user, password=password, dsn=dsn)
-
     # Create an SQLAlchemy engine
-    engine = create_engine(f"oracle+oracledb://{user}:{password}@{dsn}")
+    engine = create_engine(f"oracle+oracledb://{user}:{password}@{host}:{port}/?service_name={service_name}")
 
     # Pass the engine to LangChain's SQLDatabase
     db = SQLDatabase(engine)
@@ -254,7 +254,7 @@ with st.sidebar:
                         user=st.session_state["User"],
                         password=st.session_state["Password"],
                         host=st.session_state["Host"],
-                        database=st.session_state["Service_Name"],
+                        service_name=st.session_state["Service_Name"],
                         port=int(st.session_state["Port"])
                     )
                     st.session_state.db = db
