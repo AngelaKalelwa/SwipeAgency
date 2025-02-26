@@ -212,70 +212,68 @@ if "db" not in st.session_state:
     st.session_state.db = None   
 
 # Sidebar for connection settings
-#with st.sidebar:
-    #st.subheader("Settings")
-    #st.write("This is a simple chat application. Connect to the database and start chatting.")
-
-    #st.text_input("Host", value=os.getenv("DB_HOST", "localhost"),key='Host')
-    #st.text_input("Port", value=os.getenv("DB_PORT", "1521"), key="Port")
-    #st.text_input("User", value=os.getenv("DB_USER", "root"), key="User")
-    #st.text_input("Password", type="password", value=os.getenv("DB_PASSWORD", ""), key="Password")
-    #st.text_input("Service_Name", value=os.getenv("DB_SERVICE", "orcl"), key="Service_Name")
-
-    #if st.button("Connect")and not st.session_state.db:
-       # try:
-            #with st.spinner("Connecting to the Database...."):
-                #db = init_database(
-                    #st.session_state["User"],
-                    #st.session_state["Password"],
-                    #st.session_state["Host"],
-                    #st.session_state["Port"],
-                    #st.session_state["Service_Name"]
-        #)
-            #st.session_state["db"] = db
-            #st.success("Connected to database")
-        #except Exception as e:
-            #st.error(f"Connection failed: {str(e)}")
-
-    #if st.session_state.db:
-        #st.success("Already connected to the database")
-
-import streamlit as st
-
-# Sidebar for connection settings
 with st.sidebar:
     st.subheader("Settings")
     st.write("This is a simple chat application. Connect to the database and start chatting.")
 
-    # Remove all default values for security
-    host = st.text_input("Host", key='Host')  # No default value
-    port = st.text_input("Port", key="Port")  # No default value
-    user = st.text_input("User", key="User")  # No default value
-    password = st.text_input("Password", type="password", key="Password")  # No default value
-    service_name = st.text_input("Service Name", key="Service_Name")  # No default value
+    st.text_input("Host", value=os.getenv("DB_HOST", "localhost"),key='Host')
+    st.text_input("Port", value=os.getenv("DB_PORT", "1521"), key="Port")
+    st.text_input("User", value=os.getenv("DB_USER", "root"), key="User")
+    st.text_input("Password", type="password", value=os.getenv("DB_PASSWORD", ""), key="Password")
+    st.text_input("Service_Name", value=os.getenv("DB_SERVICE", "orcl"), key="Service_Name")
 
-    # Ensure all fields are filled before connecting
-    if st.button("Connect") and not st.session_state.get("db"):
-        if all([host, port, user, password, service_name]):
-            try:
-                with st.spinner("Connecting to the Database...."):
-                    db = init_database(
-                        user,
-                        password,
-                        host,
-                        port,
-                        service_name
-                    )
-                st.session_state["db"] = db
-                st.success("Connected to database")
-            except Exception as e:
-                st.error(f"Connection failed: {str(e)}")
-        else:
-            st.warning("Please fill in all fields before connecting.")
+    if st.button("Connect")and not st.session_state.db:
+        try:
+            with st.spinner("Connecting to the Database...."):
+                db = init_database(
+                    st.session_state["User"],
+                    st.session_state["Password"],
+                    st.session_state["Host"],
+                    st.session_state["Port"],
+                    st.session_state["Service_Name"]
+        )
+            st.session_state["db"] = db
+            st.success("Connected to database")
+        except Exception as e:
+            st.error(f"Connection failed: {str(e)}")
 
-    if st.session_state.get("db"):
+    if st.session_state.db:
         st.success("Already connected to the database")
 
+
+# Sidebar for connection settings
+#with st.sidebar:
+    #st.subheader("Settings")
+    #st.write("This is a simple chat application. Connect to the database and start chatting.")
+
+    # Remove all default values for security
+    #host = st.text_input("Host", key='Host')  # No default value
+    #port = st.text_input("Port", key="Port")  # No default value
+    #user = st.text_input("User", key="User")  # No default value
+    #password = st.text_input("Password", type="password", key="Password")  # No default value
+    #service_name = st.text_input("Service Name", key="Service_Name")  # No default value
+
+    # Ensure all fields are filled before connecting
+    #if st.button("Connect") and not st.session_state.get("db"):
+        #if all([host, port, user, password, service_name]):
+            #try:
+                #with st.spinner("Connecting to the Database...."):
+                    #db = init_database(
+                        #user,
+                        #password,
+                        #host,
+                        #port,
+                        #service_name
+                    #)
+                #st.session_state["db"] = db
+                #st.success("Connected to database")
+            #except Exception as e:
+                #st.error(f"Connection failed: {str(e)}")
+        #else:
+            #st.warning("Please fill in all fields before connecting.")
+
+    #if st.session_state.get("db"):
+        #st.success("Already connected to the database")
 
 # Display chat history
 for message in st.session_state.chat_history:
