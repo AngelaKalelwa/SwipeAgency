@@ -1,12 +1,14 @@
 import os
 import streamlit as st
+import cx_Oracle
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser 
-from langchain_community.utilities import SQLDatabase
+from langchain_community.utilities import SQLDatabase 
+
 
 load_dotenv()  # Load environment variables
 
@@ -258,7 +260,7 @@ with st.sidebar:
                     st.success("Connected to database")
             except Exception as e:
                 st.error(f"Connection failed: {str(e)}")
-                
+
 # Sidebar for connection settings
 #with st.sidebar:
     #st.subheader("Settings")
