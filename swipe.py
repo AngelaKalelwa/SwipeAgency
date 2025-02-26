@@ -20,11 +20,18 @@ def init_database(user: str, password: str, host: str, database: str, port: int 
     user = os.getenv("DB_USER", user)
     password = os.getenv("DB_PASSWORD", password)
     host = os.getenv("DB_HOST", host)
-    port = os.getenv("DB_PORT", port)
-    service_name = os.getenv("DB_SERVICE", "orcl")
-    
+    port = int(os.getenv("DB_PORT", port))
+    service_name = os.getenv("DB_SERVICE", database)
+
+    if not user or not password or not host or not service_name:
+        raise ValueError("Missing required database connection details.")
+
     db_uri = f"oracle+cx_oracle://{user}:{password}@{host}:{port}/?service_name={service_name}"
-    return SQLDatabase.from_uri(db_uri)
+    
+    try:
+        return SQLDatabase.from_uri(db_uri)
+    except Exception as e:
+        raise ConnectionError(f"Failed to connect to the databse: {e}")
 
 
 def get_sql_chain(db):
@@ -207,39 +214,56 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         AIMessage(content="Hello! I'm an Oracle SQL Database assistant. Ask me anything about your database.")
     ]
- # Check if database connection already exists in session state
+# Check if database connection already exists in session state
 if "db" not in st.session_state:
     st.session_state.db = None   
+
+if "Host" not in st.session_state:
+    st.session_state["Host"] = os.getenv("DB_HOST", "localhost")
+
+if "Port" not in st.session_state:
+    st.session_state["Port"] = os.getenv("DB_PORT", "1521")
+
+if "User" not in st.session_state:
+    st.session_state["User"] = os.getenv("DB_USER", "root")
+
+if "Password" not in st.session_state:
+    st.session_state["Password"] = os.getenv("DB_PASSWORD", "")
+
+if "Service_Name" not in st.session_state:
+    st.session_state["Service_Name"] = os.getenv("DB_SERVICE", "orcl")
 
 # Sidebar for connection settings
 with st.sidebar:
     st.subheader("Settings")
     st.write("This is a simple chat application. Connect to the database and start chatting.")
 
-    st.text_input("Host", value=os.getenv("DB_HOST", "localhost"),key='Host')
-    st.text_input("Port", value=os.getenv("DB_PORT", "1521"), key="Port")
-    st.text_input("User", value=os.getenv("DB_USER", "root"), key="User")
-    st.text_input("Password", type="password", value=os.getenv("DB_PASSWORD", ""), key="Password")
-    st.text_input("Service_Name", value=os.getenv("DB_SERVICE", "orcl"), key="Service_Name")
+    st.text_input("Host", value=st.session_state["Host"], key="Host")
+    st.text_input("Port", value=st.session_state["Port"], key="Port")
+    st.text_input("User", value=st.session_state["User"], key="User")
+    st.text_input("Password", type="password", value=st.session_state["Password"], key="Password")
+    st.text_input("Service Name", value=st.session_state["Service_Name"], key="Service_Name")
 
-    if st.button("Connect")and not st.session_state.db:
-        try:
-            with st.spinner("Connecting to the Database...."):
-                db = init_database(
-                    st.session_state["User"],
-                    st.session_state["Password"],
-                    st.session_state["Host"],
-                    st.session_state["Port"],
-                    st.session_state["Service_Name"]
-        )
-            st.session_state["db"] = db
-            st.success("Connected to database")
-        except Exception as e:
-            st.error(f"Connection failed: {str(e)}")
+    if st.button("Connect"):
+        if st.session_state.db:
+            st.success("Already connected to the database")
+        else:
+            try:
+                with st.spinner("Connecting to the Database..."):
+                    db = init_database(
+                        user=st.session_state["User"],
+                        password=st.session_state["Password"],
+                        host=st.session_state["Host"],
+                        database=st.session_state["Service_Name"],  # Fix parameter order
+                        port=int(st.session_state["Port"])  # Ensure Port is an integer
+                    )
+                    st.session_state.db = db
+                    st.success("Connected to database")
+            except Exception as e:
+                st.error(f"Connection failed: {str(e)}")
 
     if st.session_state.db:
         st.success("Already connected to the database")
-
 
 # Sidebar for connection settings
 #with st.sidebar:
