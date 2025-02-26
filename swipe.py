@@ -1,6 +1,7 @@
 import os
 import streamlit as st
-import cx_Oracle
+import oracledb
+from sqlalchemy import create_engine
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -12,29 +13,29 @@ from langchain_community.utilities import SQLDatabase
 
 load_dotenv()  # Load environment variables
 
-def init_database(user: str, password: str, host: str, database: str, port: int = 1521) -> SQLDatabase:
-    """
-    Initializes a connection to an Oracle database using cx_Oracle.
-    
-    Returns:
-    - SQLDatabase: A LangChain SQLDatabase instance
-    """
-    user = os.getenv("DB_USER", user)
-    password = os.getenv("DB_PASSWORD", password)
-    host = os.getenv("DB_HOST", host)
-    port = int(os.getenv("DB_PORT", port))
-    service_name = os.getenv("DB_SERVICE", database)
+def init_database():
+    user = "your_username"
+    password = "your_password"
+    host = "your_host"
+    port = "1521"  # Default Oracle port
+    service_name = "your_service"
 
-    if not user or not password or not host or not service_name:
-        raise ValueError("Missing required database connection details.")
+    # Construct the DSN string
+    dsn = f"{host}:{port}/{service_name}"
 
-    db_uri = f"oracle+cx_oracle://{user}:{password}@{host}:{port}/?service_name={service_name}"
-    
-    try:
-        return SQLDatabase.from_uri(db_uri)
-    except Exception as e:
-        raise ConnectionError(f"Failed to connect to the databse: {e}")
+    # Initialize OracleDB (Optional, only for Thick Mode)
+    # oracledb.init_oracle_client(lib_dir="path_to_instant_client")
 
+    # Create the OracleDB connection
+    connection = oracledb.connect(user=user, password=password, dsn=dsn)
+
+    # Create an SQLAlchemy engine
+    engine = create_engine(f"oracle+oracledb://{user}:{password}@{dsn}")
+
+    # Pass the engine to LangChain's SQLDatabase
+    db = SQLDatabase(engine)
+
+    return db
 
 def get_sql_chain(db):
     """Generates an SQL query based on user input and database schema."""
